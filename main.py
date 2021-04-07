@@ -103,7 +103,7 @@ def add_product():
     form = ProductsForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        products = Jobs()
+        products = Products()
         products.title = form.title.data
         products.quantity = form.quantity.data
         products.price = form.price.data
