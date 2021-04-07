@@ -2,8 +2,10 @@ from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from forms.job import JobsForm
+from forms.product import ProductsForm
 from forms.user import RegisterForm, LoginForm
 from data.jobs import Jobs
+from data.products import Products
 from data.users import User
 from data import db_session
 
@@ -93,6 +95,25 @@ def add_job():
         db_sess.commit()
         return redirect('/')
     return render_template('jobs.html', title='Добавление работы', form=form)
+
+
+@app.route('/addproduct', methods=['GET', 'POST'])
+@login_required
+def add_product():
+    form = ProductsForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        products = Jobs()
+        products.title = form.title.data
+        products.quantity = form.quantity.data
+        products.price = form.price.data
+        products.description = form.description.data
+        products.category = form.category.data
+        current_user.products.append(products)
+        db_sess.merge(current_user)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('products.html', title='Добавление товара', form=form)
 
 
 @app.route('/addjob/<int:id>', methods=['GET', 'POST'])
