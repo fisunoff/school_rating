@@ -20,7 +20,7 @@ def load_user(user_id):
 
 
 def main():
-    db_session.global_init("db/mars.db")
+    db_session.global_init("db/main.db")
     app.run()
 
 
