@@ -27,11 +27,11 @@ def main():
 
 
 @app.route("/")
+@app.route("/main")
 def index():
     db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs)
-    # print(jobs.first())
-    return render_template("index.html", jobs=jobs)
+    products = db_sess.query(Products)
+    return render_template("index.html", products=products)
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -9,9 +9,9 @@
   <body>
     <header>
         <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">Наше приложение</a>
+        <a class="navbar-brand" href="#">Интернет магазин</a>
         {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+            <a class="navbar-brand" href="/logout">{{ current_user.name }} выход</a>
         {% else %}
             <p>
                 <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
@@ -20,8 +20,6 @@
         {% endif %}
     </nav>
     </header>
-    <h1>Миссия Колонизация Марса</h1>
-    <h4>И на Марсе будут яблони цвести!</h4>
     <!-- Begin page content -->
     <main role="main" class="container">
         {% block content %}{% endblock %}
