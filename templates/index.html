@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Список работ</h1>
+    <h1>Список товаров</h1>
     {% if current_user.is_authenticated and current_user.role == "sell" %}
         <a href="add_product" class="btn btn-secondary">Добавить товар</a>
     {% endif %}
@@ -15,7 +15,7 @@
                 Продавец - {{ item.user.name }}
             </div>
             <div>
-                <h5>Цена: {{ item.price }}</h5>
+                <h5>Цена: {{ item.price }}. В наличии {{ item.quantity }} шт</h5>
             </div>
             {% if current_user.is_authenticated and (current_user == item.user or current_user.id == 1) %}
                 <div>

@@ -125,7 +125,7 @@ def edit_product(id):
             return redirect('/')
         else:
             abort(404)
-    return render_template('products.html', title='Редактирование работы', form=form)
+    return render_template('products.html', title='Редактирование товара', form=form)
 
 
 @app.route('/product_delete/<int:id>', methods=['GET', 'POST'])
