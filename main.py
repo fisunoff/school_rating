@@ -1,10 +1,9 @@
 from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
-from forms.job import JobsForm
+
 from forms.product import ProductsForm
 from forms.user import RegisterForm, LoginForm
-from data.jobs import Jobs
 from data.products import Products
 from data.users import User
 from data import db_session
@@ -77,27 +76,7 @@ def logout():
     return redirect("/")
 
 
-@app.route('/addjob', methods=['GET', 'POST'])
-@login_required
-def add_job():
-    form = JobsForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        jobs = Jobs()
-        jobs.team_leader = form.team_leader.data
-        jobs.job = form.job.data
-        jobs.work_size = form.work_size.data
-        jobs.collaborators = form.collaborators.data
-        jobs.start_date = form.start_date.data
-        jobs.is_finished = form.is_finished.data
-        current_user.jobs.append(jobs)
-        db_sess.merge(current_user)
-        db_sess.commit()
-        return redirect('/')
-    return render_template('jobs.html', title='Добавление работы', form=form)
-
-
-@app.route('/addproduct', methods=['GET', 'POST'])
+@app.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
     form = ProductsForm()
@@ -116,48 +95,46 @@ def add_product():
     return render_template('products.html', title='Добавление товара', form=form)
 
 
-@app.route('/addjob/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_product/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_job(id):
-    form = JobsForm()
+def edit_product(id):
+    form = ProductsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        jobs = db_sess.query(Jobs).filter((Jobs.id == id),
-                                          ((Jobs.user == current_user) | (current_user.id == 1))).first()
-        if jobs:
-            form.team_leader.data = jobs.team_leader
-            form.job.data = jobs.job
-            form.work_size.data = jobs.work_size
-            form.collaborators.data = jobs.collaborators
-            form.start_date.data = jobs.start_date
-            form.is_finished.data = jobs.is_finished
+        products = db_sess.query(Products).filter((Products.id == id),
+                                          ((Products.user == current_user) | (current_user.id == 1))).first()
+        if products:
+            form.title.data = products.title
+            form.quantity.data = products.quantity
+            form.price.data = products.price
+            form.description.data = products.description
+            form.category.data = products.category
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        jobs = db_sess.query(Jobs).filter((Jobs.id == id),
-                                          ((Jobs.user == current_user) | (current_user.id == 1))).first()
-        if jobs:
-            jobs.team_leader = form.team_leader.data
-            jobs.job = form.job.data
-            jobs.work_size = form.work_size.data
-            jobs.collaborators = form.collaborators.data
-            jobs.start_date = form.start_date.data
-            jobs.is_finished = form.is_finished.data
+        products = db_sess.query(Products).filter((Products.id == id),
+                                          ((Products.user == current_user) | (current_user.id == 1))).first()
+        if products:
+            products.title = form.title.data
+            products.quantity = form.quantity.data
+            products.price = form.price.data
+            products.description = form.description.data
+            products.category = form.category.data
             db_sess.commit()
             return redirect('/')
         else:
             abort(404)
-    return render_template('jobs.html', title='Редактирование работы', form=form)
+    return render_template('products.html', title='Редактирование работы', form=form)
 
 
-@app.route('/job_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/product_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-def job_delete(id):
+def product_delete(id):
     db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs).filter((Jobs.id == id), ((Jobs.user == current_user) | (current_user.id == 1))).first()
-    if jobs:
-        db_sess.delete(jobs)
+    products = db_sess.query(Products).filter((Products.id == id), ((Products.user == current_user) | (current_user.id == 1))).first()
+    if products:
+        db_sess.delete(products)
         db_sess.commit()
     else:
         abort(404)
