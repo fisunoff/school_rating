@@ -2,6 +2,7 @@ import requests
 import sqlite3
 import json
 import pprint
+import random
 from qiwi_key import mylogin, api_access_token
 
 
@@ -11,15 +12,16 @@ class Payments:
         with sqlite3.connect("../db/payments.db") as connection:
             cursor = connection.cursor()
             cursor.execute(
-                f"""CREATE TABLE IF NOT EXISTS {TableName} (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                 user_id INTEGER, phone TEXT, sum INTEGER, success BOOL)""")
+                f"""CREATE TABLE IF NOT EXISTS {TableName} (transaction_id INTEGER PRIMARY KEY,
+                 user_id INTEGER, phone TEXT, sender_phone TEXT,sum INTEGER, hash TEXT, success BOOL)""")
             connection.commit()
 
-    def AddRecord(self, transaction_id, user_id, phone, summa, success):
+    def AddRecord(self, user_id, phone, sender_phone, summa, hash, success):
         with sqlite3.connect("../db/payments.db") as connection:
             cursor = connection.cursor()
-            cursor.execute(f"INSERT INTO {self.tablename} VALUES(?, ?, ?, ?, ?)",
-                           (transaction_id, user_id, phone, summa, success))
+            cursor.execute(
+                f"INSERT INTO {self.tablename} (user_id, phone, sender_phone, sum, hash, success) VALUES(?, ?, ?, ?, ?, ?)",
+                (user_id, phone, sender_phone, summa, hash, success))
             connection.commit()
 
     def GetRecord(self, transaction_id):
@@ -43,14 +45,18 @@ class Payments:
         h = s.get('https://edge.qiwi.com/payment-history/v2/persons/' + my_login + '/payments', params=parameters)
         return h.json()
 
+    def make_hash(self):
+        return "%016x" % random.getrandbits(64)
+
 
 Payments = Payments("Incoming")
-data = Payments.payment_history_last()
-result = Payments.GetRecord(1)
-
-for i in range(len(data['data'])):
-    if data['data'][i]['personId'] == int(result[2]):
-        if data['data'][i]['comment'] == int(result[0]):
-            if data['data'][i]['sum']['amount'] == int(result[3]):
-                if data['data'][i]["status"] == "SUCCESS":
-                    Payments.ChangeRecord(0)
+Payments.AddRecord(1, "79176546462", "78005553535", 100, Payments.make_hash(), 0)
+# data = Payments.payment_history_last()
+# result = Payments.GetRecord(1)
+#
+# for i in range(len(data['data'])):
+#     if data['data'][i]['personId'] == int(result[2]):
+#         if data['data'][i]['comment'] == int(result[0]):
+#             if data['data'][i]['sum']['amount'] == int(result[3]):
+#                 if data['data'][i]["status"] == "SUCCESS":
+#                     Payments.ChangeRecord(0)
