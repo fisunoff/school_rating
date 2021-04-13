@@ -141,5 +141,12 @@ def product_delete(id):
     return redirect('/')
 
 
+@app.route('/product/<int:id>', methods=['GET', 'POST'])
+def product_page(id):
+    db_sess = db_session.create_session()
+    product = db_sess.query(Products).filter((Products.id == id)).first()
+    return render_template("product.html", item=product)
+
+
 if __name__ == '__main__':
     main()

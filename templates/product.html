@@ -1,28 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Список работ</h1>
-{% if current_user.is_authenticated and current_user.role == "sell" %}
-<a href="addproduct" class="btn btn-secondary">Добавить товар</a>
+<h1>{{item.title}}</h1>
+{% if current_user.is_authenticated and current_user.role != "sell" %}
+<a href="../buy_product/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Купить</a>
+<a href="../add_to_cart/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Добавить в корзину</a>
+{% elif current_user.is_authenticated and current_user.role == "sell" %}
+<a href="/register" class="btn btn-secondary">Вы не можете покупать товары, так как являетесь продавцом. Зарегистрируйтесь как покупатель</a>
+{% else %}
+<a href="/register" class="btn btn-secondary">Для совершения покупок необходимо зарегистрироваться</a>
 {% endif %}
-{% for item in products %}
+
 <div class="col-md6 border rounded">
-    <h2>{{ item.title}}</h2>
+    {% if item.quantity < 10 %}
+    <h2>Поторопитесь! Товаров осталось совсем немного</h2>
+    {% endif %}
+    <div>
+        На складе: {{ item.quantity }}
+    </div>
     <div>
         {{ item.content }}
     </div>
     <div>
-        Продавец - {{ item.user.name }}
+        Продавец: {{ item.user.name }}
     </div>
     <div>
         <h5>Цена: {{ item.price }}</h5>
     </div>
-    {% if current_user.is_authenticated and (current_user == item.user or current_user.id == 1) %}
     <div>
-        <a href="/addproduct/{{ item.id }}" class="btn btn-warning">Изменить</a>
-        <a href="/product_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
+        <h5>Описание: {{ item.description }}</h5>
     </div>
-    {% endif %}
+
 </div>
-{% endfor %}
+
 {% endblock %}

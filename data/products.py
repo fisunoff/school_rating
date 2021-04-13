@@ -11,7 +11,6 @@ class Products(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     quantity = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    # seller = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     price = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     category = sqlalchemy.Column(sqlalchemy.String, nullable=True)
@@ -20,4 +19,4 @@ class Products(SqlAlchemyBase):
     user = orm.relationship('User', foreign_keys="Products.user_id", backref="products")
 
     def __repr__(self):
-        return f'<Product> {self.id} {self.quantity} {self.seller} {self.price} {self.description} {self.category}'
+        return f'<Product> {self.id} {self.quantity} {self.user_id} {self.price} {self.description} {self.category}'
