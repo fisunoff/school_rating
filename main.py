@@ -1,7 +1,6 @@
 from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
-
 from forms.product import ProductsForm
 from forms.user import RegisterForm, LoginForm
 from data.products import Products
@@ -102,7 +101,7 @@ def edit_product(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                          ((Products.user == current_user) | (current_user.id == 1))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1))).first()
         if products:
             form.title.data = products.title
             form.quantity.data = products.quantity
@@ -114,7 +113,7 @@ def edit_product(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                          ((Products.user == current_user) | (current_user.id == 1))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1))).first()
         if products:
             products.title = form.title.data
             products.quantity = form.quantity.data
@@ -132,7 +131,8 @@ def edit_product(id):
 @login_required
 def product_delete(id):
     db_sess = db_session.create_session()
-    products = db_sess.query(Products).filter((Products.id == id), ((Products.user == current_user) | (current_user.id == 1))).first()
+    products = db_sess.query(Products).filter((Products.id == id),
+                                              ((Products.user == current_user) | (current_user.id == 1))).first()
     if products:
         db_sess.delete(products)
         db_sess.commit()
@@ -146,6 +146,34 @@ def product_page(id):
     db_sess = db_session.create_session()
     product = db_sess.query(Products).filter((Products.id == id)).first()
     return render_template("product.html", item=product)
+
+
+@app.route('/cart', methods=['GET', 'POST'])
+@login_required
+def cart():
+    db_sess = db_session.create_session()
+    cart_db = db_sess.query(User).filter((User.id == current_user))
+    return render_template("cart.html", item=cart_db)
+
+
+@app.route('/add_to_cart/<user_id>/<item_id>', methods=['GET', 'POST'])
+@login_required
+def add_to_cart(user_id, item_id):
+    db_sess = db_session.create_session()
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    cart_now = eval(cart_db.cart)
+    if int(item_id) in cart_now.keys():
+        cart_now[int(item_id)] += 1
+    else:
+        cart_now[int(item_id)] = 1
+    cart_db.cart = str(cart_now)
+    db_sess.commit()
+    return redirect("/add_to_cart_success")
+
+
+@app.route('/add_to_cart_success', methods=['GET', 'POST'])
+def add_to_cart_success():
+    return render_template("add_to_cart_success.html")
 
 
 if __name__ == '__main__':

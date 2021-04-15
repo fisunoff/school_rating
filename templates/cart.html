@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{item.title}}</h1>
+{% if current_user.is_authenticated and current_user.role != "sell" %}
+
+<h1>{{item}} {{current_user.id}}</h1>
+
+{% elif current_user.is_authenticated and current_user.role == "sell" %}
+<a href="/register" class="btn btn-secondary">Вы не можете покупать товары, так как являетесь продавцом. Зарегистрируйтесь как покупатель</a>
+{% else %}
+<a href="/register" class="btn btn-secondary">Для совершения покупок необходимо зарегистрироваться</a>
+{% endif %}
+
+{% endblock %}
