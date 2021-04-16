@@ -9,12 +9,15 @@
 {% for product in products %}
 <div class="col-md6 border rounded">
     {% if product.id in cart_db.keys() %}
-    <div>
-        <h2>{{product.title}}</h2>
-        <h4>Количество в корзине: {{cart_db[product.id]}}</h4>
-        <h6>Цена: {{product.price}}</h6>
-        <h4>Стоимость: {{product.price * cart_db[product.id]}}</h4>
-    </div>
+        {% if cart_db[product.id] != 0 %}
+        <div>
+            <h2>{{product.title}}</h2>
+            <h4>Количество в корзине: {{cart_db[product.id]}}</h4>
+            <h6>Цена: {{product.price}}</h6>
+            <h4>Стоимость: {{product.price * cart_db[product.id]}}</h4>
+            <a href="/delete_from_cart/{{ product.id }}" class="btn btn-danger">Удалить из корзины</a>
+        </div>
+        {% endif %}
     {% endif %}
 </div>
 {% endfor %}

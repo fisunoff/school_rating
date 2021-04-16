@@ -192,5 +192,22 @@ def add_to_cart_error(product_id):
     return render_template("add_to_cart_error.html", product_id=product_id)
 
 
+@app.route('/delete_from_cart/<item_id>', methods=['GET', 'POST'])
+@login_required
+def delete_from_cart(item_id):
+    db_sess = db_session.create_session()
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    products = db_sess.query(Products).filter((Products.id == item_id)).first()
+    cart_now = eval(cart_db.cart)
+    if int(item_id) in cart_now.keys():
+        print(111)
+        products.quantity += cart_now[int(item_id)]
+        cart_now[int(item_id)] = 0
+    cart_db.cart = str(cart_now)
+
+    db_sess.commit()
+    return redirect("/cart")
+
+
 if __name__ == '__main__':
     main()
