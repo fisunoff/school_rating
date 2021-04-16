@@ -3,8 +3,10 @@
 {% block content %}
 <h1>{{item.title}}</h1>
 {% if current_user.is_authenticated and current_user.role != "sell" %}
+{% if item.quantity > 0 %}
 <a href="../buy_product/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Купить</a>
 <a href="../add_to_cart/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Добавить в корзину</a>
+{% endif %}
 {% elif current_user.is_authenticated and current_user.role == "sell" %}
 <a href="/register" class="btn btn-secondary">Вы не можете покупать товары, так как являетесь продавцом. Зарегистрируйтесь как покупатель</a>
 {% else %}
@@ -12,8 +14,10 @@
 {% endif %}
 
 <div class="col-md6 border rounded">
-    {% if item.quantity < 10 %}
+    {% if 0 < item.quantity < 10 %}
     <h2>Поторопитесь! Товаров осталось совсем немного</h2>
+    {% elif item.quantity < 1 %}
+    <h2>К сожалению, товары закончились</h2>
     {% endif %}
     <div>
         На складе: {{ item.quantity }}

@@ -159,7 +159,8 @@ def cart():
     for i in products:
         if i.id in cart_db_cart.keys():
             price_all += i.price * cart_db_cart[i.id]
-    return render_template("cart.html", item=cart_db, cart_db=eval(cart_db.cart), products=products, price_all=price_all)
+    return render_template("cart.html", item=cart_db, cart_db=eval(cart_db.cart), products=products,
+                           price_all=price_all)
 
 
 @app.route('/add_to_cart/<user_id>/<item_id>', methods=['GET', 'POST'])
@@ -167,12 +168,16 @@ def cart():
 def add_to_cart(user_id, item_id):
     db_sess = db_session.create_session()
     cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    products = db_sess.query(Products).filter((Products.id == item_id)).first()
+    if int(products.quantity) < 1:
+        return redirect(f"/add_to_cart_error/{products.id}")
     cart_now = eval(cart_db.cart)
     if int(item_id) in cart_now.keys():
         cart_now[int(item_id)] += 1
     else:
         cart_now[int(item_id)] = 1
     cart_db.cart = str(cart_now)
+    products.quantity -= 1
     db_sess.commit()
     return redirect("/add_to_cart_success")
 
@@ -180,6 +185,11 @@ def add_to_cart(user_id, item_id):
 @app.route('/add_to_cart_success', methods=['GET', 'POST'])
 def add_to_cart_success():
     return render_template("add_to_cart_success.html")
+
+
+@app.route('/add_to_cart_error/<product_id>', methods=['GET', 'POST'])
+def add_to_cart_error(product_id):
+    return render_template("add_to_cart_error.html", product_id=product_id)
 
 
 if __name__ == '__main__':
