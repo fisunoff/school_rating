@@ -17,6 +17,8 @@ class User(SqlAlchemyBase, UserMixin):
     role = sqlalchemy.Column(sqlalchemy.Integer)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     cart = sqlalchemy.Column(sqlalchemy.String, default="{}")
+    orders = sqlalchemy.Column(sqlalchemy.String, default="[]")
+    balance = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
     # jobs = orm.relation("Jobs", back_populates='user')

@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from forms.product import ProductsForm
 from forms.user import RegisterForm, LoginForm
 from data.products import Products
+from data.orders import Orders
 from data.users import User
 from data import db_session
 
@@ -160,7 +161,7 @@ def cart():
         if i.id in cart_db_cart.keys():
             price_all += i.price * cart_db_cart[i.id]
     return render_template("cart.html", item=cart_db, cart_db=eval(cart_db.cart), products=products,
-                           price_all=price_all)
+                           price_all=price_all, balance=cart_db.balance)
 
 
 @app.route('/add_to_cart/<user_id>/<item_id>', methods=['GET', 'POST'])
@@ -207,6 +208,30 @@ def delete_from_cart(item_id):
 
     db_sess.commit()
     return redirect("/cart")
+
+
+@app.route('/put_on_balance', methods=['GET', 'POST'])
+@login_required
+def put_on_balance():
+    # Заглушка под пополнение баланса. На данный момент система автоматически пополняет баланс на 10000 уе
+    db_sess = db_session.create_session()
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    cart_db.balance += 10000
+
+    db_sess.commit()
+    return render_template("/balance_updated.html", money_col=10000)
+
+
+@app.route('/accept_cart', methods=['GET', 'POST'])
+@login_required
+def accept_cart():
+    db_sess = db_session.create_session()
+    orders = Orders()
+    orders.products = "{1: 10, 2: 20, 'cost':1234}"
+
+    db_sess.merge(current_user)
+    db_sess.commit()
+    return render_template("/order_created.html")
 
 
 if __name__ == '__main__':
