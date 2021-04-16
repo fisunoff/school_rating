@@ -4,8 +4,21 @@
 <h1>{{item.title}}</h1>
 {% if current_user.is_authenticated and current_user.role != "sell" %}
 
-<h1>{{item}} {{current_user.id}}</h1>
+<h1>Привет, {{current_user.name}}</h1>
 
+{% for product in products %}
+<div class="col-md6 border rounded">
+    {% if product.id in cart_db.keys() %}
+    <div>
+        <h2>{{product.title}}</h2>
+        <h4>Количество в корзине: {{cart_db[product.id]}}</h4>
+        <h6>Цена: {{product.price}}</h6>
+        <h4>Стоимость: {{product.price * cart_db[product.id]}}</h4>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+<h1>Итого: {{price_all}}</h1>
 {% elif current_user.is_authenticated and current_user.role == "sell" %}
 <a href="/register" class="btn btn-secondary">Вы не можете покупать товары, так как являетесь продавцом. Зарегистрируйтесь как покупатель</a>
 {% else %}

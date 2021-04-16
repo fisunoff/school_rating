@@ -152,8 +152,14 @@ def product_page(id):
 @login_required
 def cart():
     db_sess = db_session.create_session()
-    cart_db = db_sess.query(User).filter((User.id == current_user))
-    return render_template("cart.html", item=cart_db)
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    cart_db_cart = eval(cart_db.cart)
+    products = db_sess.query(Products)
+    price_all = 0
+    for i in products:
+        if i.id in cart_db_cart.keys():
+            price_all += i.price * cart_db_cart[i.id]
+    return render_template("cart.html", item=cart_db, cart_db=eval(cart_db.cart), products=products, price_all=price_all)
 
 
 @app.route('/add_to_cart/<user_id>/<item_id>', methods=['GET', 'POST'])
