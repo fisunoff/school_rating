@@ -258,5 +258,16 @@ def accept_cart():
     return render_template("/order_created.html")
 
 
+@app.route('/orders_test', methods=['GET', 'POST'])
+@login_required
+def orders():
+    db_sess = db_session.create_session()
+    orders_db = db_sess.query(Orders).filter((Orders.user_id == current_user.id)).all()
+    d = []
+    for i in orders_db:
+        d.append({"id": i.id, "products": eval(i.products), "date": i.order_time, "status": i.status})
+    return render_template("orders.html", orders=d)
+
+
 if __name__ == '__main__':
     main()

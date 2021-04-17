@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Привет, {{current_user.name}}</h1>
+
+{% for order in orders %}
+<div class="col-md6 border rounded">
+    <h3>Номер заказа: {{order.id}}</h3>
+    {% for product in order.products.keys() %}
+        {{product}}: {{order.products[product]}} <br>
+    {% endfor %}
+    Статус: {{order.status}}
+</div>
+{% endfor %}
+
+{% endblock %}
