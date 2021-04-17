@@ -236,7 +236,7 @@ def accept_cart():
 
     for i in products:
         if i.id in cart_db_cart.keys():
-            cart_list[i.id] = cart_db_cart[i.id]
+            cart_list[i.title] = cart_db_cart[i.id]
             price_all += i.price * cart_db_cart[i.id]
     cart_list["price"] = price_all
     orders.products = str(cart_list)
@@ -258,7 +258,7 @@ def accept_cart():
     return render_template("/order_created.html")
 
 
-@app.route('/orders_test', methods=['GET', 'POST'])
+@app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
     db_sess = db_session.create_session()
