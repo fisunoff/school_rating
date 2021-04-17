@@ -51,7 +51,7 @@ class Payments:
         data = Payments.payment_history_last(self)
         for i in range(len(data['data'])):
             if data['data'][i]['personId'] == int(info["phone"]):
-                if data['data'][i]['comment'] == info["hash"]:
+                if data['data'][i]['comment'].strip() == info["hash"].strip():
                     if data['data'][i]['sum']['amount'] == int(info["sum"]):
                         if data['data'][i]["status"] == "SUCCESS":
                             self.ChangeRecord(info["hash"], data['data'][i]["account"].strip("+"))
@@ -91,3 +91,5 @@ class Payments:
 #
 # # нормальная(релизная конструкция) пополнения
 # # print(Payments.check_deposit(Payments.deposit_money_request(USER_ID, SUMMA)))
+
+

@@ -239,11 +239,14 @@ def deposit_money(amount):
     Payments_object = Payments("Incoming")
     form = CheckOperation()
     if form.validate_on_submit():
-        print("CHECK")
         info = Payments_object.GetRecord(form.hash.data)
         data = {"user_id": info[1], "phone": info[2], "sender_phone": info[3], "sum": info[4], "hash": info[5],
                 "success": info[6]}
-        return redirect(f"/put_on_balance/{amount}")
+        if Payments_object.check_deposit(data):
+            return redirect(f"/put_on_balance/{amount}")
+        else:
+            return render_template("/deposit_failure.html", title='Ошибка пополнения баланса')
+
     else:
         data = Payments_object.deposit_money_request(user_id=current_user.id, summa=amount)
         return render_template('deposit_money.html', title=f'Пополнение баланса на {amount} уе', form=form, data=data)
