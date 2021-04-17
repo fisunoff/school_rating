@@ -27,8 +27,8 @@
 <h1>Недостаточно средств! Пополните баланс</h1>
 {% else %}
 <a href="/accept_cart" class="btn btn-primary btn-lg btn-block">Купить</a>
-<a href="/add_money" class="btn btn-primary btn-lg btn-block">Пополнить баланс</a>
 {% endif %}
+<a href="/add_money" class="btn btn-primary btn-lg btn-block">Пополнить баланс</a>
 {% elif current_user.is_authenticated and current_user.role == "sell" %}
 <a href="/register" class="btn btn-secondary">Вы не можете покупать товары, так как являетесь продавцом. Зарегистрируйтесь как покупатель</a>
 {% else %}

@@ -32,7 +32,7 @@ def main():
 def index():
     db_sess = db_session.create_session()
     products = db_sess.query(Products)
-    return render_template("index.html", products=products)
+    return render_template("index.html", products=products, title="Главная")
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -49,7 +49,8 @@ def reqister():
         user = User(
             name=form.name.data,
             email=form.email.data,
-            about=form.about.data
+            about=form.about.data,
+            role="sell" if form.role.data else "buy"
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -148,7 +149,7 @@ def product_delete(id):
 def product_page(id):
     db_sess = db_session.create_session()
     product = db_sess.query(Products).filter((Products.id == id)).first()
-    return render_template("product.html", item=product)
+    return render_template("product.html", item=product, title="Просмотр карточки товара")
 
 
 @app.route('/cart', methods=['GET', 'POST'])
@@ -163,7 +164,7 @@ def cart():
         if i.id in cart_db_cart.keys():
             price_all += i.price * cart_db_cart[i.id]
     return render_template("cart.html", item=cart_db, cart_db=eval(cart_db.cart), products=products,
-                           price_all=price_all, balance=cart_db.balance)
+                           price_all=price_all, balance=cart_db.balance, title="Корзина")
 
 
 @app.route('/add_to_cart/<user_id>/<item_id>', methods=['GET', 'POST'])
@@ -187,12 +188,12 @@ def add_to_cart(user_id, item_id):
 
 @app.route('/add_to_cart_success', methods=['GET', 'POST'])
 def add_to_cart_success():
-    return render_template("add_to_cart_success.html")
+    return render_template("add_to_cart_success.html", title="Интернет-магазин")
 
 
 @app.route('/add_to_cart_error/<product_id>', methods=['GET', 'POST'])
 def add_to_cart_error(product_id):
-    return render_template("add_to_cart_error.html", product_id=product_id)
+    return render_template("add_to_cart_error.html", product_id=product_id, title="Интернет-магазин")
 
 
 @app.route('/delete_from_cart/<item_id>', methods=['GET', 'POST'])
@@ -282,18 +283,36 @@ def accept_cart():
 
     db_sess.commit()
 
-    return render_template("/order_created.html")
+    return render_template("/order_created.html", title="Заказ создан")
 
 
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def orders():
     db_sess = db_session.create_session()
-    orders_db = db_sess.query(Orders).filter((Orders.user_id == current_user.id)).all()
+    if current_user.id == 1 or current_user.id == 7:
+        orders_db = db_sess.query(Orders).all()  # Супер-админу доступны все заказы пользователей
+    else:
+        orders_db = db_sess.query(Orders).filter((Orders.user_id == current_user.id)).all()
     d = []
     for i in orders_db:
         d.append({"id": i.id, "products": eval(i.products), "date": i.order_time, "status": i.status})
-    return render_template("orders.html", orders=d)
+    return render_template("orders.html", orders=d, title="Заказы")
+
+
+@app.route('/edit_order_status/<order_id>/<status>', methods=['GET', 'POST'])
+@login_required
+def edit_order_status(order_id, status):
+    status_types = {"1": "В обработке", "2": "Доставляется", "3": "Доставлено!",
+                    "error": "Что-то пошло не так! Свяжитесь с технической поддержкой!"}
+    db_sess = db_session.create_session()
+    if current_user.id == 1 or current_user.id == 7:  # Только для супер-админа
+        orders_db = db_sess.query(Orders).filter(Orders.id == order_id).first()
+    else:
+        return redirect("/")
+    orders_db.status = status_types[status]
+    db_sess.commit()
+    return redirect("/orders")
 
 
 if __name__ == '__main__':
