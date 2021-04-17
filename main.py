@@ -2,10 +2,12 @@ from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from forms.product import ProductsForm
+from forms.balance import AddBalanceForm, CheckOperation
 from forms.user import RegisterForm, LoginForm
 from data.products import Products
 from data.orders import Orders
 from data.users import User
+from data.qiwi_api import Payments
 from data import db_session
 
 app = Flask(__name__)
@@ -209,16 +211,41 @@ def delete_from_cart(item_id):
     return redirect("/cart")
 
 
-@app.route('/put_on_balance', methods=['GET', 'POST'])
+@app.route('/put_on_balance/<amount>', methods=['GET', 'POST'])
 @login_required
-def put_on_balance():
-    # Заглушка под пополнение баланса. На данный момент система автоматически пополняет баланс на 10000 уе
+def put_on_balance(amount):
     db_sess = db_session.create_session()
     cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
-    cart_db.balance += 10000
-
+    cart_db.balance += int(amount)
     db_sess.commit()
-    return render_template("/balance_updated.html", money_col=10000)
+
+    return render_template("/balance_updated.html", money_col=amount)
+
+
+@app.route('/add_money', methods=['GET', 'POST'])
+@login_required
+def add_money():
+    form = AddBalanceForm()
+    if form.validate_on_submit():
+        amount = form.amount.data
+        return redirect(f"/deposit_money/{amount}")
+    return render_template('add_money.html', title='Пополнение баланса', form=form)
+
+
+@app.route('/deposit_money/<amount>', methods=['GET', 'POST'])
+@login_required
+def deposit_money(amount):
+    Payments_object = Payments("Incoming")
+    form = CheckOperation()
+    if form.validate_on_submit():
+        print("CHECK")
+        info = Payments_object.GetRecord(form.hash.data)
+        data = {"user_id": info[1], "phone": info[2], "sender_phone": info[3], "sum": info[4], "hash": info[5],
+                "success": info[6]}
+        return redirect(f"/put_on_balance/{amount}")
+    else:
+        data = Payments_object.deposit_money_request(user_id=current_user.id, summa=amount)
+        return render_template('deposit_money.html', title=f'Пополнение баланса на {amount} уе', form=form, data=data)
 
 
 @app.route('/accept_cart/', methods=['GET', 'POST'])
