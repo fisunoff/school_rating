@@ -201,7 +201,6 @@ def delete_from_cart(item_id):
     products = db_sess.query(Products).filter((Products.id == item_id)).first()
     cart_now = eval(cart_db.cart)
     if int(item_id) in cart_now.keys():
-        print(111)
         products.quantity += cart_now[int(item_id)]
         cart_now[int(item_id)] = 0
     cart_db.cart = str(cart_now)
@@ -222,15 +221,40 @@ def put_on_balance():
     return render_template("/balance_updated.html", money_col=10000)
 
 
-@app.route('/accept_cart', methods=['GET', 'POST'])
+@app.route('/accept_cart/', methods=['GET', 'POST'])
 @login_required
 def accept_cart():
+    price_all = 0
+    cart_list = {}
+
     db_sess = db_session.create_session()
     orders = Orders()
-    orders.products = "{1: 10, 2: 20, 'cost':1234}"
 
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    cart_db_cart = eval(cart_db.cart)
+    products = db_sess.query(Products)
+
+    for i in products:
+        if i.id in cart_db_cart.keys():
+            cart_list[i.id] = cart_db_cart[i.id]
+            price_all += i.price * cart_db_cart[i.id]
+    cart_list["price"] = price_all
+    orders.products = str(cart_list)
+
+    if int(cart_db.balance) < price_all:
+        return render_template("/not_enough_money.html")
+
+    current_user.orders.append(orders)
     db_sess.merge(current_user)
     db_sess.commit()
+
+    db_sess = db_session.create_session()
+    cart_db = db_sess.query(User).filter((User.id == current_user.id)).first()
+    cart_db.balance -= price_all
+    cart_db.cart = "{}"
+
+    db_sess.commit()
+
     return render_template("/order_created.html")
 
 
