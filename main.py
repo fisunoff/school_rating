@@ -263,7 +263,7 @@ def accept_cart():
 @login_required
 def orders():
     db_sess = db_session.create_session()
-    if current_user.id == 1:
+    if current_user.id == 1 or current_user.id == 7:
         orders_db = db_sess.query(Orders).all()  # Супер-админу доступны все заказы пользователей
     else:
         orders_db = db_sess.query(Orders).filter((Orders.user_id == current_user.id)).all()
@@ -271,6 +271,21 @@ def orders():
     for i in orders_db:
         d.append({"id": i.id, "products": eval(i.products), "date": i.order_time, "status": i.status})
     return render_template("orders.html", orders=d, title="Заказы")
+
+
+@app.route('/edit_order_status/<order_id>/<status>', methods=['GET', 'POST'])
+@login_required
+def edit_order_status(order_id, status):
+    status_types = {"1": "В обработке", "2": "Доставляется", "3": "Доставлено!",
+                    "error": "Что-то пошло не так! Свяжитесь с технической поддержкой!"}
+    db_sess = db_session.create_session()
+    if current_user.id == 1 or current_user.id == 7:  # Только для супер-админа
+        orders_db = db_sess.query(Orders).filter(Orders.id == order_id).first()
+    else:
+        return redirect("/")
+    orders_db.status = status_types[status]
+    db_sess.commit()
+    return redirect("/orders")
 
 
 if __name__ == '__main__':
