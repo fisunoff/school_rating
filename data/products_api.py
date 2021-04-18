@@ -60,14 +60,12 @@ def create_product(secret_key):
     return jsonify({'success': 'OK'})
 
 
-@blueprint.route('/secret_api/products/<int:product_id>/<secret_key>', methods=['DELETE'])
-def delete_job(product_id, secret_key):
+@blueprint.route('/secret_api/products/<secret_key>/<int:product_id>', methods=['DELETE'])
+def delete_product(secret_key, product_id):
     if secret_key not in secret_keys:
         return jsonify({'error': 'wrong_secret_key'})
     db_sess = db_session.create_session()
     products = db_sess.query(Products).get(product_id)
-    if not request.json:
-        return jsonify({'error': 'Empty request'})
     if not products:
         return jsonify({'error': 'Not found'})
     db_sess.delete(products)

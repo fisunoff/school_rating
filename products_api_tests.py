@@ -3,7 +3,7 @@ import datetime, json
 
 # для успешного прохождения всех групп тестов нужно удалить продукт номер 4, если он существует
 # для этого раскомментируйте строку ниже
-# print(delete('http://localhost:5000/api/products/4').json())
+# print(delete('http://localhost:5000/secret_api/products/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0/4').json())
 
 # тесты получения продукта
 print(get('http://localhost:5000/api/products').json())
@@ -48,16 +48,16 @@ print(get('http://localhost:5000/api/products').json())
 
 
 # тесты удаления продукта
-print(delete('http://localhost:5000/secret_api/products/4/abrakadabra').json())
+print(delete('http://localhost:5000/secret_api/products/abrakadabra/4').json())
 # продукт не удалился, неверный секретный ключ
 
-print(delete('http://localhost:5000/secret_api/products/4/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0').json())
+print(delete('http://localhost:5000/secret_api/products/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0/4').json())
 # продукт удалился
 
-print(delete('http://localhost:5000/secret_api/products/4/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0').json())
+print(delete('http://localhost:5000/secret_api/products/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0/4').json())
 # получаем ошибку. Такого продукта уже нет
 
-print(delete('http://localhost:5000/secret_api/products/qwerty/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0').json())
+print(delete('http://localhost:5000/secret_api/products/Q0oaaSor5RfnWXrOYNNnx6QveWJ8A755qWeMfwR0/qwerty').json())
 # получаем ошибку. Неверный формат
 
 print(get('http://localhost:5000/api/products').json())
