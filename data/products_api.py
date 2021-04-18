@@ -1,10 +1,16 @@
 import flask
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 
 from data import db_session
 from data.products import Products
+from data.secret_keys import secret_keys
 
 blueprint = flask.Blueprint('products_api', __name__, template_folder='templates')
+
+
+@blueprint.route('/api')
+def about_api():
+    return render_template("about_API.html")
 
 
 @blueprint.route('/api/products')
@@ -27,8 +33,10 @@ def get_one_product(product_id):
         only=('id', 'title', 'quantity', 'price', "description", "category", "user_id"))})
 
 
-@blueprint.route('/api/products', methods=['POST'])
-def create_product():
+@blueprint.route('/secret_api/products/<secret_key>', methods=['POST'])
+def create_product(secret_key):
+    if secret_key not in secret_keys:
+        return jsonify({'error': 'wrong_secret_key'})
     db_sess = db_session.create_session()
     if not request.json:
         return jsonify({'error': 'Empty request'})
@@ -52,8 +60,10 @@ def create_product():
     return jsonify({'success': 'OK'})
 
 
-@blueprint.route('/api/products/<int:product_id>', methods=['DELETE'])
-def delete_job(product_id):
+@blueprint.route('/secret_api/products/<int:product_id>/<secret_key>', methods=['DELETE'])
+def delete_job(product_id, secret_key):
+    if secret_key not in secret_keys:
+        return jsonify({'error': 'wrong_secret_key'})
     db_sess = db_session.create_session()
     products = db_sess.query(Products).get(product_id)
     if not request.json:

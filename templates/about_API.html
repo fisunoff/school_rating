@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Работа с API</h1>
+У сайта есть открытый для всех и ограниченный API.<br>
+<h6>Открытые возможности:</h6>
+Получение всех товаров /api/products <br>
+Получение информации по одному из товаров /api/products/product_id
+
+<h6>Возможности, доступные с секретным ключом (для получения обратитесь к администратору)</h6>
+Добавить товар /secret_api/products/secret_key post <br>
+Удалить товар /secret_api/products/secret_key delete
+{% endblock %}
