@@ -31,9 +31,19 @@ def main():
 
 @app.route("/")
 @app.route("/main")
-def index():
+@app.route("/main/<sort_type>")
+def index(sort_type="default"):
     db_sess = db_session.create_session()
     products = db_sess.query(Products)
+    if sort_type == "sorted_by_name":
+        products = [i for i in sorted(products, key=lambda x: x.title)]
+    elif sort_type == "sorted_by_price_up":
+        products = [i for i in sorted(products, key=lambda x: x.price)]
+    elif sort_type == "sorted_by_price_down":
+        products = [i for i in sorted(products, reverse=True, key=lambda x: x.price)]
+    elif sort_type == "sorted_by_num":
+        products = [i for i in sorted(products, key=lambda x: x.quantity)]
+
     return render_template("index.html", products=products, title="Главная")
 
 
@@ -108,7 +118,7 @@ def edit_product(id):
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
                                                   ((Products.user == current_user) | (current_user.id == 1) | (
-                                                              current_user.id == 7))).first()
+                                                          current_user.id == 7))).first()
         if products:
             form.title.data = products.title
             form.quantity.data = products.quantity
@@ -121,7 +131,7 @@ def edit_product(id):
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
                                                   ((Products.user == current_user) | (current_user.id == 1) | (
-                                                              current_user.id == 7))).first()
+                                                          current_user.id == 7))).first()
         if products:
             products.title = form.title.data
             products.quantity = form.quantity.data
@@ -141,7 +151,7 @@ def product_delete(id):
     db_sess = db_session.create_session()
     products = db_sess.query(Products).filter((Products.id == id),
                                               ((Products.user == current_user) | (current_user.id == 1) | (
-                                                          current_user.id == 7))).first()
+                                                      current_user.id == 7))).first()
     if products:
         db_sess.delete(products)
         db_sess.commit()
