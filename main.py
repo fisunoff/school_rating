@@ -105,7 +105,7 @@ def edit_product(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
         if products:
             form.title.data = products.title
             form.quantity.data = products.quantity
@@ -117,7 +117,7 @@ def edit_product(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
         if products:
             products.title = form.title.data
             products.quantity = form.quantity.data
@@ -136,7 +136,7 @@ def edit_product(id):
 def product_delete(id):
     db_sess = db_session.create_session()
     products = db_sess.query(Products).filter((Products.id == id),
-                                              ((Products.user == current_user) | (current_user.id == 1))).first()
+                                              ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
     if products:
         db_sess.delete(products)
         db_sess.commit()
