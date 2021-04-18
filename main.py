@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, abort
+from flask import Flask, render_template, redirect, request, abort, make_response, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from forms.product import ProductsForm
@@ -8,7 +8,7 @@ from data.products import Products
 from data.orders import Orders
 from data.users import User
 from data.qiwi_api import Payments
-from data import db_session
+from data import db_session, products_api
 
 import os
 
@@ -24,8 +24,14 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
+@app.errorhandler(404)
+def not_found(_):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
 def main():
     db_session.global_init("db/main.db")
+    app.register_blueprint(products_api.blueprint)
     app.run()
 
 
