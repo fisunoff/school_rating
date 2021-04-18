@@ -10,6 +10,8 @@ from data.users import User
 from data.qiwi_api import Payments
 from data import db_session
 
+import os
+
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -105,7 +107,8 @@ def edit_product(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1) | (
+                                                              current_user.id == 7))).first()
         if products:
             form.title.data = products.title
             form.quantity.data = products.quantity
@@ -117,7 +120,8 @@ def edit_product(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
+                                                  ((Products.user == current_user) | (current_user.id == 1) | (
+                                                              current_user.id == 7))).first()
         if products:
             products.title = form.title.data
             products.quantity = form.quantity.data
@@ -136,7 +140,8 @@ def edit_product(id):
 def product_delete(id):
     db_sess = db_session.create_session()
     products = db_sess.query(Products).filter((Products.id == id),
-                                              ((Products.user == current_user) | (current_user.id == 1) | (current_user.id == 7))).first()
+                                              ((Products.user == current_user) | (current_user.id == 1) | (
+                                                          current_user.id == 7))).first()
     if products:
         db_sess.delete(products)
         db_sess.commit()
@@ -149,7 +154,8 @@ def product_delete(id):
 def product_page(id):
     db_sess = db_session.create_session()
     product = db_sess.query(Products).filter((Products.id == id)).first()
-    return render_template("product.html", item=product, title="Просмотр карточки товара")
+    img_path = f"/static/img/{id}.jpg"
+    return render_template("product.html", item=product, title="Просмотр карточки товара", img_path=img_path)
 
 
 @app.route('/cart', methods=['GET', 'POST'])
