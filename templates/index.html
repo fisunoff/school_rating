@@ -5,7 +5,7 @@
     {% if current_user.is_authenticated and current_user.role == "sell" %}
         <a href="add_product" class="btn btn-secondary">Добавить товар</a>
     {% endif %}
-    Сортировать по: <a href="/main/sorted_by_price_up">Цене по возрастанию</a> <a href="/main/sorted_by_price_down">Цене по убыванию</a>
+    Сортировать по: <a href="/main/sorted_by_price_up">Возрастанию цены</a> <a href="/main/sorted_by_price_down">Убыванию цены</a>
     <a href="/main/sorted_by_name">Наименованию</a>  <a href="/main/sorted_by_num">Количеству</a> <a href="/main">Умолчанию</a>
     {% for item in products %}
         <div class="col-md6 border rounded">
