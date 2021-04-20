@@ -4,7 +4,6 @@
 <h1>{{item.title}}</h1>
 {% if current_user.is_authenticated and current_user.role != "sell" %}
 {% if item.quantity > 0 %}
-<a href="../buy_product/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Купить</a>
 <a href="../add_to_cart/{{current_user.id}}/{{item.id}}" class="btn btn-secondary">Добавить в корзину</a>
 {% endif %}
 {% elif current_user.is_authenticated and current_user.role == "sell" %}
@@ -34,7 +33,7 @@
     <div>
         <h5>Описание: {{ item.description }}</h5>
     </div>
-    <img class="d-block w-50" src={{img_path}} alt="Продавец еще не добавил изображение">
+    <img class="d-block w-50" src={{item.photo_path}} alt="Продавец еще не добавил изображение">
 
 </div>
 

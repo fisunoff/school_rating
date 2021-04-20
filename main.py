@@ -1,5 +1,7 @@
 from flask import Flask, render_template, redirect, request, abort, make_response, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
+from sqlalchemy.sql import null
 
 from forms.product import ProductsForm
 from forms.balance import AddBalanceForm, CheckOperation
@@ -109,6 +111,14 @@ def add_product():
         products.price = form.price.data
         products.description = form.description.data
         products.category = form.category.data
+        if form.photo.data:
+            fname, fext = os.path.splitext(secure_filename(form.photo.data.filename))
+            filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
+            while os.path.exists(filepath):
+                fname += "_1"
+                filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
+            form.photo.data.save(filepath)
+            products.photo_path = os.path.join('..', 'static', "user_photos", fname + fext)
         current_user.products.append(products)
         db_sess.merge(current_user)
         db_sess.commit()
@@ -144,6 +154,16 @@ def edit_product(id):
             products.price = form.price.data
             products.description = form.description.data
             products.category = form.category.data
+            if form.photo.data:
+                fname, fext = os.path.splitext(secure_filename(form.photo.data.filename))
+                filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
+                while os.path.exists(filepath):
+                    fname += "_1"
+                    filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
+                form.photo.data.save(filepath)
+                products.photo_path = os.path.join('..', 'static', "user_photos", fname + fext)
+            else:
+                products.photo_path = null()
             db_sess.commit()
             return redirect('/')
         else:
@@ -170,8 +190,7 @@ def product_delete(id):
 def product_page(id):
     db_sess = db_session.create_session()
     product = db_sess.query(Products).filter((Products.id == id)).first()
-    img_path = f"/static/img/{id}.jpg"
-    return render_template("product.html", item=product, title="Просмотр карточки товара", img_path=img_path)
+    return render_template("product.html", item=product, title="Просмотр карточки товара")
 
 
 @app.route('/cart', methods=['GET', 'POST'])

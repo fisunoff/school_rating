@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateTimeField
+from wtforms import StringField, BooleanField, SubmitField, IntegerField, DateTimeField, FileField
 from wtforms.validators import DataRequired
 
 
@@ -9,4 +9,5 @@ class ProductsForm(FlaskForm):
     price = IntegerField("Цена", validators=[DataRequired()])
     description = StringField("Описание", validators=[DataRequired()])
     category = StringField("Категория")
+    photo = FileField("Фото товара")
     submit = SubmitField('Применить')
