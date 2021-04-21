@@ -360,5 +360,10 @@ def edit_order_status(order_id, status):
     return redirect("/orders")
 
 
+@app.route('/support', methods=['GET', 'POST'])
+def support():
+    return render_template("support.html")
+
+
 if __name__ == '__main__':
     main()
