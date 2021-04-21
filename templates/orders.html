@@ -11,7 +11,7 @@
         {{product}}: {{order.products[product]}} <br>
     {% endfor %}
     Статус: {{order.status}}
-    {% if current_user.id == 1 or current_user.id == 7 %}
+    {% if current_user.id in super_admins_ids %}
     <a href="/edit_order_status/{{order.id}}/1" class="btn btn-secondary">В обработке</a>
     <a href="/edit_order_status/{{order.id}}/2" class="btn btn-secondary">Доставляется</a>
     <a href="/edit_order_status/{{order.id}}/3" class="btn btn-secondary">Доставлено!</a>

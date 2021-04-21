@@ -19,7 +19,7 @@
             <div>
                 <h5>Цена: {{ item.price }}. В наличии {{ item.quantity }} шт</h5>
             </div>
-            {% if current_user.is_authenticated and (current_user == item.user or current_user.id == 1 or current_user.id == 7) %}
+            {% if current_user.is_authenticated and (current_user == item.user or current_user.id in super_admins) %}
                 <div>
                     <a href="/edit_product/{{ item.id }}" class="btn btn-warning">Изменить</a>
                     <a href="/product_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>

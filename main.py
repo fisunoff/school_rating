@@ -10,6 +10,7 @@ from data.products import Products
 from data.orders import Orders
 from data.users import User
 from data.qiwi_api import Payments
+from data.super_admins import super_admins_ids
 from data import db_session, products_api
 
 import os
@@ -52,7 +53,7 @@ def index(sort_type="default"):
     elif sort_type == "sorted_by_num":
         products = [i for i in sorted(products, key=lambda x: x.quantity)]
 
-    return render_template("index.html", products=products, title="Главная")
+    return render_template("index.html", products=products, title="Главная", super_admins=super_admins_ids)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -133,8 +134,8 @@ def edit_product(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1) | (
-                                                          current_user.id == 7))).first()
+                                                  ((Products.user == current_user) | (
+                                                          current_user.id in super_admins_ids))).first()
         if products:
             form.title.data = products.title
             form.quantity.data = products.quantity
@@ -146,8 +147,8 @@ def edit_product(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (current_user.id == 1) | (
-                                                          current_user.id == 7))).first()
+                                                  ((Products.user == current_user) | (
+                                                          current_user.id in super_admins_ids))).first()
         if products:
             products.title = form.title.data
             products.quantity = form.quantity.data
@@ -176,8 +177,8 @@ def edit_product(id):
 def product_delete(id):
     db_sess = db_session.create_session()
     products = db_sess.query(Products).filter((Products.id == id),
-                                              ((Products.user == current_user) | (current_user.id == 1) | (
-                                                      current_user.id == 7))).first()
+                                              ((Products.user == current_user) | (
+                                                      current_user.id in super_admins_ids))).first()
     if products:
         db_sess.delete(products)
         db_sess.commit()
@@ -334,14 +335,14 @@ def accept_cart():
 @login_required
 def orders():
     db_sess = db_session.create_session()
-    if current_user.id == 1 or current_user.id == 7:
+    if current_user.id in super_admins_ids:
         orders_db = db_sess.query(Orders).all()  # Супер-админу доступны все заказы пользователей
     else:
         orders_db = db_sess.query(Orders).filter((Orders.user_id == current_user.id)).all()
     d = []
     for i in orders_db:
         d.append({"id": i.id, "products": eval(i.products), "date": i.order_time, "status": i.status})
-    return render_template("orders.html", orders=d, title="Заказы")
+    return render_template("orders.html", orders=d, title="Заказы", super_admins_ids=super_admins_ids)
 
 
 @app.route('/edit_order_status/<order_id>/<status>', methods=['GET', 'POST'])
@@ -350,7 +351,7 @@ def edit_order_status(order_id, status):
     status_types = {"1": "В обработке", "2": "Доставляется", "3": "Доставлено!",
                     "error": "Что-то пошло не так! Свяжитесь с технической поддержкой!"}
     db_sess = db_session.create_session()
-    if current_user.id == 1 or current_user.id == 7:  # Только для супер-админа
+    if current_user.id in super_admins_ids:  # Только для супер-админа
         orders_db = db_sess.query(Orders).filter(Orders.id == order_id).first()
     else:
         return redirect("/")
