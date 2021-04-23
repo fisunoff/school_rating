@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired
 
 
 class AddBalanceForm(FlaskForm):
-    amount = IntegerField("Сумма пополнения, уе", validators=[DataRequired()])
+    amount = IntegerField("Сумма пополнения, руб", validators=[DataRequired()])
     submit = SubmitField('Применить')
 
 
