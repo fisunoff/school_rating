@@ -32,6 +32,11 @@ def not_found(_):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
+@app.errorhandler(401)
+def need_registration(_):
+    return render_template("need_registration.html", title="Требуется регистрация")
+
+
 def main():
     db_session.global_init("db/main.db")
     app.register_blueprint(products_api.blueprint)
