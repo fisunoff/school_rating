@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Список товаров</h1>
+    <h1>Список событий</h1>
     {% if current_user.is_authenticated and current_user.role == "sell" %}
-        <a href="add_product" class="btn btn-secondary">Добавить товар</a>
+        <a href="/add_event" class="btn btn-secondary">Добавить событие</a>
     {% endif %}
-    Сортировать по: <a href="/main/sorted_by_price_up">Возрастанию цены</a> <a href="/main/sorted_by_price_down">Убыванию цены</a>
-    <a href="/main/sorted_by_name">Наименованию</a>  <a href="/main/sorted_by_num">Количеству</a> <a href="/main">Умолчанию</a>
-    {% for item in products %}
+    Сортировать по: <a href="/main/sorted_by_name">Названию</a> <a href="/main/sorted_by_value">Значимости</a>
+    <a href="/main/sorted_by_event_date">Дате проведения</a> <a href="/main/sorted_by_event_add_date">Дате добавления</a>
+    <a href="/main/sorted_by_event_author">Автору</a> <a href="/main">Умолчанию</a>
+    {% for item in events %}
         <div class="col-md6 border rounded">
-            <h2><a href="/product/{{item.id}}">{{item.title}}</a></h2>
+            <h2><a href="/event/{{item.id}}">{{item.event_name}}</a></h2>
             <div>
-                {{ item.content }}
+                Дата провеведения: {{ item.event_date }}
             </div>
             <div>
-                Продавец - {{ item.user.name }}
+                Автор - {{ item.author.name }}
             </div>
-            <div>
-                <h5>Цена: {{ item.price }}. В наличии {{ item.quantity }} шт</h5>
-            </div>
-            {% if current_user.is_authenticated and (current_user == item.user or current_user.id in super_admins) %}
+            <div>Значимость: {{item.value}}</div>
+
+            {% if current_user.is_authenticated and (current_user == item.author or current_user.id in super_admins) %}
                 <div>
-                    <a href="/edit_product/{{ item.id }}" class="btn btn-warning">Изменить</a>
-                    <a href="/product_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
+                    <a href="/edit_event/{{ item.id }}" class="btn btn-warning">Изменить</a>
+                    <a href="/event_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
                 </div>
             {% endif %}
         </div>

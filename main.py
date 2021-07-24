@@ -6,10 +6,12 @@ from sqlalchemy.sql import null
 from forms.product import ProductsForm
 from forms.balance import AddBalanceForm, CheckOperation
 from forms.user import RegisterForm, LoginForm
+from forms.event import EventsForm
 from data.products import Products
+from data.events import Events
 from data.orders import Orders
 from data.users import User
-from data.qiwi_api import Payments
+#from data.qiwi_api import Payments
 from data.super_admins import super_admins_ids
 from data import db_session, products_api
 
@@ -48,17 +50,19 @@ def main():
 @app.route("/main/<sort_type>")
 def index(sort_type="default"):
     db_sess = db_session.create_session()
-    products = db_sess.query(Products)
+    events = db_sess.query(Events)
     if sort_type == "sorted_by_name":
-        products = [i for i in sorted(products, key=lambda x: x.title)]
-    elif sort_type == "sorted_by_price_up":
-        products = [i for i in sorted(products, key=lambda x: x.price)]
-    elif sort_type == "sorted_by_price_down":
-        products = [i for i in sorted(products, reverse=True, key=lambda x: x.price)]
-    elif sort_type == "sorted_by_num":
-        products = [i for i in sorted(products, key=lambda x: x.quantity)]
+        events = [i for i in sorted(events, key=lambda x: x.event_name)]
+    elif sort_type == "sorted_by_value":
+        events = [i for i in sorted(events, key=lambda x: x.value)]
+    elif sort_type == "sorted_by_event_date":
+        events = [i for i in sorted(events, reverse=True, key=lambda x: x.event_date)]
+    elif sort_type == "sorted_by_add_date":
+        events = [i for i in sorted(events, key=lambda x: x.event_add_date)]
+    elif sort_type == "sorted_by_author":
+        events = [i for i in sorted(events, key=lambda x: x.author_id)]
 
-    return render_template("index.html", products=products, title="Главная", super_admins=super_admins_ids)
+    return render_template("index.html", events=events, title="Главная", super_admins=super_admins_ids)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -105,98 +109,78 @@ def logout():
     return redirect("/")
 
 
-@app.route('/add_product', methods=['GET', 'POST'])
-@login_required
-def add_product():
-    form = ProductsForm()
+@app.route("/add_event", methods=['GET', 'POST'])
+def add_event():
+    form = EventsForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        products = Products()
-        products.title = form.title.data
-        products.quantity = form.quantity.data
-        products.price = form.price.data
-        products.description = form.description.data
-        products.category = form.category.data
-        if form.photo.data:
-            fname, fext = os.path.splitext(secure_filename(form.photo.data.filename))
-            filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
-            while os.path.exists(filepath):
-                fname += "_1"
-                filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
-            form.photo.data.save(filepath)
-            products.photo_path = os.path.join('..', 'static', "user_photos", fname + fext)
-        current_user.products.append(products)
-        db_sess.merge(current_user)
+        events = Events()
+        events.event_name = form.event_name.data
+        events.event_date = form.event_date.data
+        events.value = form.value.data
+        events.ids = form.ids.data
+        events.annotation = form.annotation.data
+        current_user.events.append(events)
+        db_sess.merge(events)
         db_sess.commit()
         return redirect('/')
-    return render_template('products.html', title='Добавление товара', form=form)
+    return render_template('events.html', title='Добавление товара', form=form)
 
 
-@app.route('/edit_product/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_event/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_product(id):
-    form = ProductsForm()
+def edit_event(id):
+    form = EventsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (
-                                                          current_user.id in super_admins_ids))).first()
-        if products:
-            form.title.data = products.title
-            form.quantity.data = products.quantity
-            form.price.data = products.price
-            form.description.data = products.description
-            form.category.data = products.category
+        events = db_sess.query(Events).filter((Events.id == id),
+                                ((Events.author == current_user) | (current_user.id in super_admins_ids))).first()
+        if events:
+            form.event_name.data = events.event_name
+            form.event_date.data = events.event_date
+            form.value.data = events.value
+            form.ids.data = events.ids
+            form.annotation.data = events.annotation
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        products = db_sess.query(Products).filter((Products.id == id),
-                                                  ((Products.user == current_user) | (
+        events = db_sess.query(Events).filter((Events.id == id),
+                                                  ((Events.author == current_user) | (
                                                           current_user.id in super_admins_ids))).first()
-        if products:
-            products.title = form.title.data
-            products.quantity = form.quantity.data
-            products.price = form.price.data
-            products.description = form.description.data
-            products.category = form.category.data
-            if form.photo.data:
-                fname, fext = os.path.splitext(secure_filename(form.photo.data.filename))
-                filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
-                while os.path.exists(filepath):
-                    fname += "_1"
-                    filepath = os.path.join(app.root_path, 'static', "user_photos", fname + fext)
-                form.photo.data.save(filepath)
-                products.photo_path = os.path.join('..', 'static', "user_photos", fname + fext)
-            else:
-                products.photo_path = null()
+        if events:
+            events.event_name = form.event_name.data
+            events.event_date = form.event_date.data
+            events.value = form.value.data
+            events.ids = form.ids.data
+            events.annotation = form.annotation.data
             db_sess.commit()
             return redirect('/')
         else:
             abort(404)
-    return render_template('products.html', title='Редактирование товара', form=form)
+    return render_template('events.html', title='Редактирование события', form=form)
 
 
-@app.route('/product_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/event_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 def product_delete(id):
     db_sess = db_session.create_session()
-    products = db_sess.query(Products).filter((Products.id == id),
-                                              ((Products.user == current_user) | (
+    events = db_sess.query(Events).filter((Events.id == id),
+                                              ((Events.author == current_user) | (
                                                       current_user.id in super_admins_ids))).first()
-    if products:
-        db_sess.delete(products)
+    if events:
+        db_sess.delete(events)
         db_sess.commit()
     else:
         abort(404)
     return redirect('/')
 
 
-@app.route('/product/<int:id>', methods=['GET', 'POST'])
+@app.route('/event/<int:id>', methods=['GET', 'POST'])
 def product_page(id):
     db_sess = db_session.create_session()
-    product = db_sess.query(Products).filter((Products.id == id)).first()
-    return render_template("product.html", item=product, title="Просмотр карточки товара")
+    product = db_sess.query(Events).filter((Events.id == id)).first()
+    return render_template("event.html", item=product, title="Просмотр карточки события")
 
 
 @app.route('/cart', methods=['GET', 'POST'])
@@ -279,24 +263,6 @@ def add_money():
         return redirect(f"/deposit_money/{amount}")
     return render_template('add_money.html', title='Пополнение баланса', form=form)
 
-
-@app.route('/deposit_money/<amount>', methods=['GET', 'POST'])
-@login_required
-def deposit_money(amount):
-    Payments_object = Payments("Incoming")
-    form = CheckOperation()
-    if form.validate_on_submit():
-        info = Payments_object.GetRecord(form.hash.data)
-        data = {"user_id": info[1], "phone": info[2], "sender_phone": info[3], "sum": info[4], "hash": info[5],
-                "success": info[6]}
-        if Payments_object.check_deposit(data):
-            return redirect(f"/put_on_balance/{amount}")
-        else:
-            return render_template("/deposit_failure.html", title='Ошибка пополнения баланса')
-
-    else:
-        data = Payments_object.deposit_money_request(user_id=current_user.id, summa=amount)
-        return render_template('deposit_money.html', title=f'Пополнение баланса на {amount} уе', form=form, data=data)
 
 
 @app.route('/accept_cart/', methods=['GET', 'POST'])
