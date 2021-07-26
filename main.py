@@ -5,6 +5,7 @@ from forms.user import RegisterForm, LoginForm
 from forms.event import EventsForm
 from data.events import Events
 from data.users import User
+from data.students import Students
 from data.super_admins import super_admins_ids
 from data import db_session, products_api
 
@@ -172,9 +173,13 @@ def product_delete(id):
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def product_page(id):
     db_sess = db_session.create_session()
-    product = db_sess.query(Events).filter((Events.id == id)).first()
-    return render_template("event.html", item=product, title="Просмотр карточки события")
-
+    event = db_sess.query(Events).filter((Events.id == id)).first()
+    students = []
+    for i in eval(event.ids):
+        student = db_sess.query(Students).filter((Students.id == i)).first()
+        print(student)
+        students.append(student)
+    return render_template("event.html", item=event, title="Просмотр карточки события", students=students)
 
 
 @app.route('/support', methods=['GET', 'POST'])

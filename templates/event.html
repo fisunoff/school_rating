@@ -9,8 +9,11 @@
     <div>Дата проведения: {{ item.event_date }}</div>
     <div>Дата создания: {{ item.event_add_date }}</div>
     <div>Автор: {{ item.author.name }}</div>
-    <div>Участники: {{item.ids}}</div>
     <div><h5>Описание: {{ item.annotation }}</h5></div>
+    <div>Участники:</div>
+    {% for student in students %}
+        <div>{{student}}</div>
+    {% endfor %}
 
 </div>
 
