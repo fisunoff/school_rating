@@ -27,6 +27,9 @@ class Students(SqlAlchemyBase, UserMixin):
     def __repr__(self):
         return f'{self.name}  {self.class_num}{self.class_letter}, корпус {self.campus}'
 
+    def info(self):
+        return f'id: {self.id} || {self.name}  {self.class_num}{self.class_letter}, корпус {self.campus}'
+
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
 

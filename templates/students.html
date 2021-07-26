@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Реестр учеников</h1>
+
+
+<div class="col-md6 border rounded">
+    <div>Выберите необходимые параметры</div>
+    <form action="" method="post">
+        <p>
+            <label for="class_num">Параллель</label>
+            <input type="text" name="class_num">
+        </p>
+        <p>
+            <label for="class_letter">Литера</label>
+            <input type="text" name="class_letter">
+        </p>
+        <p>
+            <label for="campus">Корпус</label>
+            <select name="campus">
+                <option>Все</option>
+                <option>А</option>
+                <option>Т</option>
+            </select>
+        </p>
+
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+</div>
+
+{% if students %}
+    {% for student in students %}
+    <div>{{student.info()}}</div>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -112,7 +112,7 @@ def add_event():
         events.event_name = form.event_name.data
         events.event_date = form.event_date.data
         events.value = form.value.data
-        events.ids = form.ids.data
+        events.ids = f"[{form.ids.data}]"
         events.annotation = form.annotation.data
         current_user.events.append(events)
         db_sess.merge(events)
@@ -133,7 +133,7 @@ def edit_event(id):
             form.event_name.data = events.event_name
             form.event_date.data = events.event_date
             form.value.data = events.value
-            form.ids.data = events.ids
+            form.ids.data = str(events.ids)[1:-1]
             form.annotation.data = events.annotation
         else:
             abort(404)
@@ -146,7 +146,7 @@ def edit_event(id):
             events.event_name = form.event_name.data
             events.event_date = form.event_date.data
             events.value = form.value.data
-            events.ids = form.ids.data
+            events.ids = f"[{form.ids.data}]"
             events.annotation = form.annotation.data
             db_sess.commit()
             return redirect('/')
@@ -177,9 +177,51 @@ def product_page(id):
     students = []
     for i in eval(event.ids):
         student = db_sess.query(Students).filter((Students.id == i)).first()
-        print(student)
         students.append(student)
     return render_template("event.html", item=event, title="Просмотр карточки события", students=students)
+
+
+@app.route('/view_students', methods=['GET', 'POST'])
+@login_required
+def view_students():
+    if request.method == 'POST':
+        class_num = request.form.get('class_num')
+        class_letter = request.form.get('class_letter')
+        campus = request.form.get('campus')
+        #redirect(f"/show_students?campus={campus}&class_num={class_num}&class_letter={class_letter}")
+        db_sess = db_session.create_session()
+        args = []
+    if campus != "Все":
+        args.append(Students.campus == campus)
+    if class_num != "Все" and class_num != "":
+        args.append(Students.class_num == class_num)
+    if class_letter != "Все" and class_letter != "":
+        args.append(Students.class_letter == class_letter)
+    print(class_num)
+    students = db_sess.query(Students).filter(*args)
+    return render_template("students.html", title="Просмотр учеников", students=students)
+
+
+@app.route('/show_students', methods=['GET', 'POST'])
+@login_required
+def show_students():
+    campus = request.args.get('campus', default="Все", type=str)
+    class_num = request.args.get('class_num', default="Все", type=str)
+    class_letter = request.args.get('class_letter', default="Все", type=str)
+    db_sess = db_session.create_session()
+    args = []
+    if campus != "Все":
+        args.append(Students.campus == campus)
+    if class_num != "Все" or not class_num:
+        args.append(Students.class_num == class_num)
+    if class_letter != "Все" or not class_letter:
+        args.append(Students.class_letter == class_letter)
+    print(args)
+    students = db_sess.query(Students).filter(*args)
+    #, (Students.class_num == class_num) if class_num != "Все" else None
+    print(students)
+    print(students.all())
+    return render_template("students_list.html", title="Результаты поиска", students=students)
 
 
 @app.route('/support', methods=['GET', 'POST'])
