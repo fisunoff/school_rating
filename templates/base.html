@@ -10,6 +10,7 @@
     <header>
         <nav class="navbar navbar-light bg-light">
         <a class="navbar-brand" href="/main">События</a>
+        <a class="navbar-brand" href="/view_students">Ученики</a>
         {% if current_user.is_authenticated %}
             <a class="navbar-brand" href="/logout">{{ current_user.name }} выход</a>
         {% else %}

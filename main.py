@@ -9,12 +9,15 @@ from data.students import Students
 from data.super_admins import super_admins_ids
 from data import db_session, products_api
 
-import os
+# from data import campus_classes
+# import os
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+
+RATING_POINTS = {1: 1, 2: 5, 3: 20, 4: 100, 5: 1000}
 
 
 @login_manager.user_loader
@@ -184,24 +187,43 @@ def product_page(id):
 @app.route('/view_students', methods=['GET', 'POST'])
 @login_required
 def view_students():
+    args = []
+    db_sess = db_session.create_session()
     if request.method == 'POST':
         class_num = request.form.get('class_num')
         class_letter = request.form.get('class_letter')
         campus = request.form.get('campus')
         #redirect(f"/show_students?campus={campus}&class_num={class_num}&class_letter={class_letter}")
-        db_sess = db_session.create_session()
-        args = []
-    if campus != "Все":
-        args.append(Students.campus == campus)
-    if class_num != "Все" and class_num != "":
-        args.append(Students.class_num == class_num)
-    if class_letter != "Все" and class_letter != "":
-        args.append(Students.class_letter == class_letter)
-    print(class_num)
+        if campus != "Все":
+            args.append(Students.campus == campus)
+        if class_num != "Все" and class_num != "":
+            args.append(Students.class_num == class_num)
+        if class_letter != "Все" and class_letter != "":
+            args.append(Students.class_letter == class_letter)
+        print(class_num)
     students = db_sess.query(Students).filter(*args)
     return render_template("students.html", title="Просмотр учеников", students=students)
 
 
+@app.route('/update_rating', methods=['GET', 'POST'])
+@login_required
+def update_rating():
+    db_sess = db_session.create_session()
+    students = db_sess.query(Students).all()
+    for student in students:
+        student.rating_points = 0
+
+    events = db_sess.query(Events).all()
+
+    for event in events:
+        for student_id in eval(event.ids):
+            student = db_sess.query(Students).filter(Students.id == int(student_id)).first()
+            student.rating_points += RATING_POINTS[int(event.value)]
+
+    db_sess.commit()
+    return redirect("/view_students")
+
+"""
 @app.route('/show_students', methods=['GET', 'POST'])
 @login_required
 def show_students():
@@ -222,6 +244,7 @@ def show_students():
     print(students)
     print(students.all())
     return render_template("students_list.html", title="Результаты поиска", students=students)
+"""
 
 
 @app.route('/support', methods=['GET', 'POST'])
