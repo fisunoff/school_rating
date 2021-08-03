@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Просмотр карточки ученика: {{student.name}}</h2>
+Класс: {{student.class_num}} {{student.class_letter}}, корпус {{student.campus}}
+<h4>Рейтинг: {{student.rating_points}}
+Место в рейтинге: {{student.rating_place}}</h4>
+
+{% endblock %}

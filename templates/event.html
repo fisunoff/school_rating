@@ -12,7 +12,7 @@
     <div><h5>Описание: {{ item.annotation }}</h5></div>
     <div>Участники:</div>
     {% for student in students %}
-        <div>{{student}}</div>
+        <div><a href="/student_card/{{student.id}}" >{{student}}</a></div>
     {% endfor %}
 
 </div>

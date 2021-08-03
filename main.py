@@ -46,7 +46,6 @@ def main():
 @app.route("/main/<sort_type>")
 @login_required
 def index(sort_type="default"):
-    # TODO сделать показ событий только зарегистрированным пользователям, остальным - заглушка
     db_sess = db_session.create_session()
     events = db_sess.query(Events)
     if sort_type == "sorted_by_name":
@@ -111,6 +110,7 @@ def logout():
 
 
 @app.route("/add_event", methods=['GET', 'POST'])
+@login_required
 def add_event():
     form = EventsForm()
     # TODO выбор учеников из списка
@@ -180,6 +180,7 @@ def product_delete(id):
 
 
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
+@login_required
 def product_page(id):
     db_sess = db_session.create_session()
     event = db_sess.query(Events).filter((Events.id == id)).first()
@@ -229,29 +230,14 @@ def update_rating():
     db_sess.commit()
     return redirect("/view_students")
 
-# TODO карточка ученика
-"""
-@app.route('/show_students', methods=['GET', 'POST'])
+
+@app.route("/student_card/<int:student_id>")
 @login_required
-def show_students():
-    campus = request.args.get('campus', default="Все", type=str)
-    class_num = request.args.get('class_num', default="Все", type=str)
-    class_letter = request.args.get('class_letter', default="Все", type=str)
+def student_card(student_id):
     db_sess = db_session.create_session()
-    args = []
-    if campus != "Все":
-        args.append(Students.campus == campus)
-    if class_num != "Все" or not class_num:
-        args.append(Students.class_num == class_num)
-    if class_letter != "Все" or not class_letter:
-        args.append(Students.class_letter == class_letter)
-    print(args)
-    students = db_sess.query(Students).filter(*args)
-    #, (Students.class_num == class_num) if class_num != "Все" else None
-    print(students)
-    print(students.all())
-    return render_template("students_list.html", title="Результаты поиска", students=students)
-"""
+    student = db_sess.query(Students).filter(Students.id == int(student_id)).first()
+    return render_template("student_card.html", student=student)
+    # TODO расчет места в рейтинге
 
 
 @app.route('/support', methods=['GET', 'POST'])
