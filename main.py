@@ -9,7 +9,6 @@ from data.students import Students
 from data.super_admins import super_admins_ids
 from data import db_session, products_api
 
-# from data import campus_classes
 # import os
 
 app = Flask(__name__)
@@ -45,7 +44,9 @@ def main():
 @app.route("/")
 @app.route("/main")
 @app.route("/main/<sort_type>")
+@login_required
 def index(sort_type="default"):
+    # TODO сделать показ событий только зарегистрированным пользователям, остальным - заглушка
     db_sess = db_session.create_session()
     events = db_sess.query(Events)
     if sort_type == "sorted_by_name":
@@ -63,7 +64,7 @@ def index(sort_type="default"):
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -83,6 +84,7 @@ def reqister():
         db_sess.add(user)
         db_sess.commit()
         return redirect('/login')
+    # TODO верификация аккаунта через админку
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -92,6 +94,8 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and not user.verified:
+            return render_template("need_registration.html", title="Ваш аккаунт не верифицирован!")
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
@@ -109,6 +113,8 @@ def logout():
 @app.route("/add_event", methods=['GET', 'POST'])
 def add_event():
     form = EventsForm()
+    # TODO выбор учеников из списка
+    #  для начала, ссылка на список учеников
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         events = Events()
@@ -223,6 +229,7 @@ def update_rating():
     db_sess.commit()
     return redirect("/view_students")
 
+# TODO карточка ученика
 """
 @app.route('/show_students', methods=['GET', 'POST'])
 @login_required
