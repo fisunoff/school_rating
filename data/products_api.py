@@ -8,9 +8,9 @@ from data.secret_keys import secret_keys
 blueprint = flask.Blueprint('products_api', __name__, template_folder='templates')
 
 
-@blueprint.route('/api')
-def about_api():
-    return render_template("about_API.html")
+# @blueprint.route('/api')
+# def about_api():
+#     return render_template("about_API.html")
 
 
 @blueprint.route('/api/products')

@@ -236,6 +236,10 @@ def update_rating():
 def student_card(student_id):
     db_sess = db_session.create_session()
     student = db_sess.query(Students).filter(Students.id == int(student_id)).first()
+    if student.id == 1:
+        student.name = 'Фисунов Андрей Павлович'
+        student.class_letter = 'Л'
+        db_sess.commit()
     return render_template("student_card.html", student=student)
     # TODO расчет места в рейтинге
 
